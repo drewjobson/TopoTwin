@@ -1,0 +1,29 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Large reference pdfs
+*.pdf
+
+# Observability logs
+vibe_trajectory.jsonl
+
+# Unrelated project directories
+ambient-expense-agent/
+
+# Test output/scratch/temp files
+test_*.stl
+test_*.html
+eval_output_*.stl
+clinton_9_marian_test.stl
+clinton_9_marian_test.html
+test_repair.stl
+test_repair.html
+test_visual.html
