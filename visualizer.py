@@ -99,6 +99,7 @@ def create_plotly_visual(
     print(f"Saving interactive 3D model to '{output_html}'...")
     fig.write_html(output_html)
     print("Visualization saved successfully.")
+    return fig
 
 if __name__ == "__main__":
     # Test visualization with a simple pyramid

@@ -10,6 +10,27 @@ US_BOUNDS = {
     "lon_max": -66.0
 }
 
+import re
+
+def clean_address(address: str) -> str:
+    """Cleans an address by stripping out unit/apartment/suite/floor designations
+    which can fail geocoding and parcel boundary lookup.
+    """
+    # Regex to match sub-unit indicators
+    # Examples: 'Apt 2', 'Apartment B', 'Unit 4C', 'Suite 100', 'Fl 2', 'Floor 3', 'Bldg B', 'Building 2', '#12', '# 4'
+    pattern = r'(?i)\b(apt|apartment|unit|suite|ste|fl|floor|dept|room|rm|bldg|building|box|p\.?o\.?\s*box)\s*#?\s*[a-zA-Z0-9-]+|\b#\s*[a-zA-Z0-9-]+'
+    
+    cleaned = re.sub(pattern, '', address)
+    
+    # Clean up multiple commas, trailing/leading commas, and whitespace
+    cleaned = re.sub(r',\s*,', ',', cleaned) # Replace double commas
+    cleaned = re.sub(r'\s+', ' ', cleaned)    # Collapse whitespace
+    cleaned = cleaned.strip().strip(',')      # Strip leading/trailing spaces and commas
+    cleaned = re.sub(r',\s*,', ',', cleaned) # Clean again
+    cleaned = cleaned.strip()
+    
+    return cleaned
+
 def geocode_address(address: str, user_agent: str = "topotwin_agent") -> tuple[float, float, str]:
     """Resolves an address string into (latitude, longitude, display_name).
     
@@ -26,6 +47,11 @@ def geocode_address(address: str, user_agent: str = "topotwin_agent") -> tuple[f
     """
     if not address.strip():
         raise ValueError("Address cannot be empty.")
+
+    cleaned_address = clean_address(address)
+    if cleaned_address != address:
+        print(f"  Cleaned address: '{address}' -> '{cleaned_address}'")
+        address = cleaned_address
 
     geolocator = Nominatim(user_agent=user_agent)
     

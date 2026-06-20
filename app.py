@@ -1,0 +1,437 @@
+import streamlit as st
+import numpy as np
+import os
+import asyncio
+import trimesh
+from shapely.geometry import shape, Polygon as ShapelyPolygon, MultiPolygon as ShapelyMultiPolygon
+import io
+
+from tools.geocoder import geocode_address, clean_address
+from tools.parcel_service import query_ct_parcel
+from tools.dem_downloader import DEMDownloader, get_elevation_grid, calculate_grid_bounds
+from tools.mesh_builder import ManifoldMeshBuilder, build_solid_mesh
+from harness.validator import validate_mesh
+from visualizer import create_plotly_visual
+
+# Page Configuration
+st.set_page_config(
+    page_title="TopoPlot: Interactive 3D Terrain & Exact-Parcel Mesh Generator",
+    page_icon="🌟",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Custom Glassmorphic Dark styling injection
+st.markdown(
+    """
+    <style>
+    /* Sleek Dark Theme styling */
+    .stApp {
+        background-color: rgb(10, 15, 30);
+        color: white;
+    }
+    
+    /* Glowing Title */
+    .gradient-title {
+        background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 0.2rem;
+        text-shadow: 0 4px 20px rgba(0, 198, 255, 0.2);
+    }
+    
+    .gradient-subtitle {
+        color: #8fa0c0;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Custom container card style */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Highlight indicators */
+    .indicator-label {
+        font-size: 0.85rem;
+        color: #8fa0c0;
+        margin-bottom: 4px;
+    }
+    
+    .indicator-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #00C6FF;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+def run_async_loop(coro):
+    """Utility to run an async coroutine synchronously inside Streamlit."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+# App Header
+st.markdown('<div class="gradient-title">🌟 TopoPlot 3D Terrain Generator</div>', unsafe_allow_html=True)
+st.markdown('<div class="gradient-subtitle">Statewide Connecticut 2-Foot LiDAR Exact-Parcel Mesh Engine</div>', unsafe_allow_html=True)
+
+# Main two-column layout
+col_left, col_right = st.columns([1, 2], gap="large")
+
+with col_left:
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+    st.subheader("1. Address Search")
+    
+    address_input = st.text_input(
+        "Enter Connecticut Address:",
+        value="242 East Main Street, Clinton, CT",
+        help="Type any Connecticut address. Apartment or suite designations will be parsed out automatically."
+    )
+    
+    # Address Sanitization check
+    cleaned = clean_address(address_input)
+    if cleaned != address_input:
+        st.warning(f"⚠️ Unit designation detected. Searching for parent parcel at: **'{cleaned}'**")
+        
+    st.markdown("**Try these municipal examples:**")
+    col_ex1, col_ex2 = st.columns(2)
+    with col_ex1:
+        if st.button("Clinton Town Hall"):
+            address_input = "242 East Main Street, Clinton, CT"
+            st.rerun()
+    with col_ex2:
+        if st.button("Hartford City Hall"):
+            address_input = "550 Main Street, Hartford, CT"
+            st.rerun()
+            
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+    st.subheader("2. Model & Fidelity Settings")
+    
+    resolution = st.slider(
+        "Grid Resolution (Fidelity):",
+        min_value=15,
+        max_value=120,
+        value=45,
+        step=5,
+        help="Higher values increase triangle density (fidelity) for architects but increase DEM sampling duration."
+    )
+    
+    z_exaggeration = st.slider(
+        "Vertical Z-Exaggeration:",
+        min_value=0.5,
+        max_value=4.0,
+        value=2.0,
+        step=0.1,
+        help="Scales elevation features to make topography more visible."
+    )
+    
+    col_width, col_base = st.columns(2)
+    with col_width:
+        model_width_mm = st.number_input(
+            "Print Width (mm):",
+            min_value=30.0,
+            max_value=250.0,
+            value=100.0,
+            step=10.0,
+            help="Physical output model width in millimeters."
+        )
+    with col_base:
+        base_thickness_mm = st.number_input(
+            "Base Thickness (mm):",
+            min_value=1.0,
+            max_value=10.0,
+            value=3.0,
+            step=0.5,
+            help="Solid vertical padding added beneath the minimum elevation level."
+        )
+        
+    clip_to_parcel = st.checkbox(
+        "Clip strictly to Legal Parcel Boundaries",
+        value=True,
+        help="Uncheck to generate a standard rectangular terrain tile instead."
+    )
+    
+    generate_btn = st.button("Generate 3D Model", type="primary", use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with col_right:
+    if not generate_btn:
+        st.markdown('<div class="glass-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">', unsafe_allow_html=True)
+        st.image("https://img.icons8.com/color/96/3d-model.png")
+        st.markdown("### Ready to Generate")
+        st.markdown("Configure your settings on the left and click **Generate 3D Model** to fetch Connecticut ImageServer LiDAR data and build a watertight STL terrain mesh.")
+        st.markdown(
+            """
+            <div style="background: rgba(0, 198, 255, 0.05); border: 1px solid rgba(0, 198, 255, 0.1); border-radius: 8px; padding: 16px; text-align: left; margin-top: 24px;">
+            <strong>⚙️ OrcaSlicer & Creality K1 Recommendations:</strong><br>
+            - Use the <strong>Arachne</strong> wall generator in OrcaSlicer to fill fine property edges cleanly.<br>
+            - Tuned Outer Wall Acceleration: <strong>1000 - 1500 mm/s²</strong> and Outer Wall Speed: <strong>40 - 60 mm/s</strong> to eliminate vertical skirt ringing.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        # Run Pipeline Live
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        # 1. Geocode
+        status_text.text("🔄 Geocoding address...")
+        progress_bar.progress(15)
+        
+        try:
+            lat, lon, resolved_name = geocode_address(cleaned)
+            st.info(f"📍 **Resolved Location:** {resolved_name} (Coords: {lat:.6f}, {lon:.6f})")
+        except Exception as e:
+            st.error(f"❌ Geocoding Error: {e}")
+            st.stop()
+            
+        # 2. Parcel query
+        parcel_info = None
+        geometry_geojson = None
+        if clip_to_parcel:
+            status_text.text("🔄 Querying Connecticut CAMA & Parcel service...")
+            progress_bar.progress(30)
+            parcel_info = query_ct_parcel(lat, lon)
+            
+            if parcel_info:
+                geometry_geojson = parcel_info["geometry"]
+                st.success(
+                    f"✓ **Parcel Boundary Found!**\n"
+                    f"- Town: **{parcel_info['town']}**\n"
+                    f"- Owner: **{parcel_info['owner']}**\n"
+                    f"- Parcel ID: **{parcel_info['parcel_id']}**"
+                )
+            else:
+                st.warning("⚠️ No parcel boundary found at this location (or address is outside CT). Falling back to rectangular tile.")
+                clip_to_parcel = False
+                
+        # 3. Elevation download
+        status_text.text("🔄 Downloading high-res LiDAR DEM samples...")
+        progress_bar.progress(55)
+        
+        try:
+            if geometry_geojson:
+                poly_shape = shape(geometry_geojson)
+                min_x, min_y, max_x, max_y = poly_shape.bounds
+                width_ft = max_x - min_x
+                resolution_feet = width_ft / resolution
+                
+                downloader = DEMDownloader(max_concurrency=5)
+                grid_points = downloader.generate_parcel_grid(poly_shape.bounds, resolution_feet=resolution_feet)
+                
+                # PIP filter
+                from shapely import contains_xy
+                inside_mask = contains_xy(poly_shape, grid_points[:, 0], grid_points[:, 1])
+                interior_pts = grid_points[inside_mask]
+                
+                boundary_pts = []
+                if isinstance(poly_shape, ShapelyPolygon):
+                    boundary_pts.extend(list(poly_shape.exterior.coords))
+                    for hole in poly_shape.interiors:
+                        boundary_pts.extend(list(hole.coords))
+                else:
+                    for sub_poly in poly_shape.geoms:
+                        boundary_pts.extend(list(sub_poly.exterior.coords))
+                        for hole in sub_poly.interiors:
+                            boundary_pts.extend(list(hole.coords))
+                boundary_pts = np.array(boundary_pts)[:, :2]
+                
+                combined_pts = np.vstack((boundary_pts, interior_pts))
+                _, unique_idx = np.unique(np.round(combined_pts, 3), axis=0, return_index=True)
+                points_2d_ft = combined_pts[unique_idx]
+                
+                grid_elevations_ft = run_async_loop(downloader.download_elevations(points_2d_ft))
+                points_2d = grid_elevations_ft[:, :2]
+                elevations_m = grid_elevations_ft[:, 2] * 0.3048
+                
+                st.info(f"📥 Sampled **{len(points_2d)}** elevation points from UConn CT ECO LiDAR.")
+            else:
+                # Fallback USGS rectangular
+                elevations, dx_m, dy_m = get_elevation_grid(lat, lon, width_m=200, height_m=200, resolution=resolution)
+                st.info(f"📥 Sampled **{resolution}x{resolution}** grid from USGS EPQS.")
+        except Exception as e:
+            st.error(f"❌ Elevation Download Error: {e}")
+            st.stop()
+            
+        # 4. Mesh Construction & Self-Repair Loop
+        status_text.text("🔄 Triangulating 3D mesh & validating watertightness...")
+        progress_bar.progress(80)
+        
+        attempt = 1
+        max_repair_attempts = 3
+        validated = False
+        vertices = None
+        faces = None
+        
+        if geometry_geojson:
+            poly_shape = shape(geometry_geojson)
+            min_x, min_y, max_x, max_y = poly_shape.bounds
+            model_scale = model_width_mm / ((max_x - min_x) * 0.3048)
+        else:
+            model_scale = model_width_mm / 200.0
+            
+        while attempt <= max_repair_attempts:
+            if geometry_geojson:
+                thickness_meters = base_thickness_mm / (model_scale * z_exaggeration)
+                builder = ManifoldMeshBuilder(geometry_geojson, thickness_meters=thickness_meters)
+                vertices, faces = builder.build_mesh(points_2d, elevations_m, model_width_mm, z_exaggeration)
+            else:
+                south, north, west, east = calculate_grid_bounds(lat, lon, 200, 200)
+                lats = np.linspace(south, north, resolution)
+                lons = np.linspace(west, east, resolution)
+                triangles = build_solid_mesh(
+                    elevations=elevations,
+                    dx_m=dx_m,
+                    dy_m=dy_m,
+                    model_width_mm=model_width_mm,
+                    base_thickness_mm=base_thickness_mm,
+                    z_exaggeration=z_exaggeration,
+                    lats=lats,
+                    lons=lons,
+                    polygon=None
+                )
+                unique_verts = []
+                unique_verts_map = {}
+                faces = []
+                for tri in triangles:
+                    face_idx = []
+                    for v in tri:
+                        v_rounded = (round(v[0], 5), round(v[1], 5), round(v[2], 5))
+                        if v_rounded not in unique_verts_map:
+                            unique_verts_map[v_rounded] = len(unique_verts)
+                            unique_verts.append(v)
+                        face_idx.append(unique_verts_map[v_rounded])
+                    faces.append(face_idx)
+                vertices = np.array(unique_verts, dtype=np.float32)
+                faces = np.array(faces, dtype=np.int32)
+                
+            # Validate
+            validation = validate_mesh(vertices, faces)
+            if validation["valid"]:
+                validated = True
+                break
+            else:
+                if attempt < max_repair_attempts:
+                    base_thickness_mm += 1.0
+                    st.warning(f"⚠️ Validation attempt {attempt} failed (open edges or volume). Auto-repair: increasing base thickness to {base_thickness_mm}mm and rebuilding...")
+                    attempt += 1
+                else:
+                    st.error(f"❌ Mesh Validation Failed after {max_repair_attempts} attempts: {validation['errors']}")
+                    st.stop()
+                    
+        # 5. Success outputs
+        status_text.text("✓ Generation Complete!")
+        progress_bar.progress(100)
+        
+        # Display Stats Card
+        st.markdown(
+            f"""
+            <div class="glass-card">
+                <div style="display: flex; justify-content: space-between; text-align: center;">
+                    <div>
+                        <div class="indicator-label">Mesh Watertight</div>
+                        <div class="indicator-value">{"✅ Yes" if validation["watertight"] else "❌ No"}</div>
+                    </div>
+                    <div>
+                        <div class="indicator-label">Total Faces</div>
+                        <div class="indicator-value">{len(faces)}</div>
+                    </div>
+                    <div>
+                        <div class="indicator-label">Model Volume</div>
+                        <div class="indicator-value">{validation["volume"]:.1f} mm³</div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Display interactive 3D plot
+        status_text.text("🎨 Rendering 3D interactive layout...")
+        triangles = [
+            (tuple(vertices[face[0]]), tuple(vertices[face[1]]), tuple(vertices[face[2]]))
+            for face in faces
+        ]
+        
+        polygon_coords_model = None
+        if geometry_geojson:
+            polygon_coords_model = []
+            poly_shape = shape(geometry_geojson)
+            X_scaled_all = (points_2d[:, 0] * 0.3048) * model_scale
+            Y_scaled_all = (points_2d[:, 1] * 0.3048) * model_scale
+            min_x_scaled = np.min(X_scaled_all)
+            min_y_scaled = np.min(Y_scaled_all)
+            
+            rings = []
+            if isinstance(poly_shape, ShapelyPolygon):
+                rings.append(list(poly_shape.exterior.coords))
+                for hole in poly_shape.interiors:
+                    rings.append(list(hole.coords))
+            elif isinstance(poly_shape, ShapelyMultiPolygon):
+                for sub_poly in poly_shape.geoms:
+                    rings.append(list(sub_poly.exterior.coords))
+                    for hole in sub_poly.interiors:
+                        rings.append(list(hole.coords))
+            
+            first_ring = True
+            for ring in rings:
+                if not first_ring:
+                    polygon_coords_model.append((None, None, None))
+                first_ring = False
+                for pt in ring:
+                    x_ft, y_ft = pt[0], pt[1]
+                    x_mm = x_ft * 0.3048 * model_scale
+                    y_mm = y_ft * 0.3048 * model_scale
+                    dists = np.hypot(points_2d[:, 0] - x_ft, points_2d[:, 1] - y_ft)
+                    nearest_idx = np.argmin(dists)
+                    z_mm = elevations_m[nearest_idx] * z_exaggeration * model_scale
+                    x_mm -= min_x_scaled
+                    y_mm -= min_y_scaled
+                    polygon_coords_model.append((x_mm, y_mm, z_mm + 0.5))
+                    
+        # Generate Plotly figure object
+        title = f"TopoTwin: {cleaned}"
+        fig = create_plotly_visual(
+            triangles=triangles,
+            output_html="temp_output.html",
+            title=title,
+            polygon_coords=polygon_coords_model
+        )
+        
+        # Render Plotly directly in Streamlit!
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Binary STL download
+        st.subheader("3. Export STL Model")
+        
+        # Generate STL in memory
+        trimesh_mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+        stl_bytes = trimesh_mesh.export(file_type='stl')
+        
+        st.download_button(
+            label="💾 Download Watertight STL File",
+            data=stl_bytes,
+            file_name=f"topo_{cleaned.replace(' ', '_').replace(',', '')}.stl",
+            mime="application/sla",
+            use_container_width=True
+        )
+        
+        status_text.text("Generation completed successfully!")
+        st.balloons()
