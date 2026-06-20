@@ -84,15 +84,15 @@ Exact-boundary parcel meshes feature highly irregular perimeters. Printing these
 ## Usage
 
 ### Generate Clipped Parcel Mesh
-Generate a 3D physical model of 9 Marian Lane, Clinton, CT at 40x40 grid resolution:
+Generate a 3D physical model of 242 East Main Street, Clinton, CT at 40x40 grid resolution:
 ```bash
-python topo_agent.py "9 Marian Lane, Clinton, CT" --resolution 40 --output-stl clinton.stl --output-html clinton.html
+python topo_agent.py "242 East Main Street, Clinton, CT" --resolution 40 --output-stl clinton_town_hall.stl --output-html clinton_town_hall.html
 ```
 
 ### Generate Rectangular Bounding-Box Mesh
 Disable boundary clipping and output a standard rectangular terrain tile:
 ```bash
-python topo_agent.py "9 Marian Lane, Clinton, CT" --resolution 40 --no-clip --output-stl clinton_square.stl --output-html clinton_square.html
+python topo_agent.py "242 East Main Street, Clinton, CT" --resolution 40 --no-clip --output-stl clinton_square.stl --output-html clinton_square.html
 ```
 
 ### Run the Evaluation & Validation Suite

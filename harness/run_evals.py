@@ -293,19 +293,19 @@ def run_self_repair_test() -> bool:
 
 def run_exact_boundary_clinton_test() -> bool:
     print("\n" + "=" * 80)
-    print("RUNNING EXACT BOUNDARY PARCEL TEST: 9 MARIAN LANE, CLINTON, CT")
+    print("RUNNING EXACT BOUNDARY PARCEL TEST: 242 EAST MAIN STREET, CLINTON, CT")
     print("=" * 80)
     
     import topo_agent
     
     passed = False
     try:
-        output_stl = "clinton_9_marian_test.stl"
-        output_html = "clinton_9_marian_test.html"
+        output_stl = "clinton_town_hall_test.stl"
+        output_html = "clinton_town_hall_test.html"
         
-        # Run the full pipeline for 9 Marian Lane with high-res UConn LiDAR
+        # Run the full pipeline for Clinton Town Hall with high-res UConn LiDAR
         success = topo_agent.run_pipeline(
-            address_or_coords="9 Marian Lane, Clinton, CT",
+            address_or_coords="242 East Main Street, Clinton, CT",
             width_m=200,
             height_m=200,
             resolution=40,
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     print(f"Benchmarks: {'PASSED' if benchmarks_success else 'FAILED'}")
     print(f"Security Policies: {'PASSED' if security_success else 'FAILED'}")
     print(f"Self-Repair Loop: {'PASSED' if repair_success else 'FAILED'}")
-    print(f"9 Marian Lane Exact-Parcel: {'PASSED' if clinton_success else 'FAILED'}")
+    print(f"Clinton Town Hall Exact-Parcel: {'PASSED' if clinton_success else 'FAILED'}")
     print("-" * 80)
     print(f"OVERALL STATUS: {'SUCCESS' if all_success else 'FAILURE'}")
     print("=" * 80)
