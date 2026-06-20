@@ -390,6 +390,7 @@ with col_right:
         
         lat, lon = st.session_state["selected_coords"]
         resolved_name = st.session_state["selected_address"]
+        cleaned = clean_address(resolved_name)
         st.info(f"📍 **Target Location:** {resolved_name} (Coords: {lat:.6f}, {lon:.6f})")
             
         # 2. Parcel query
