@@ -25,116 +25,121 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Sleek Dark Theme styling */
+    /* Earthy Matte Charcoal Theme styling */
     .stApp {
-        background-color: rgb(10, 15, 30);
-        color: white;
+        background-color: #181A1B;
+        color: #F1F0EA;
     }
     
-    /* Glowing Title */
+    /* Glowing Contour Title */
     .gradient-title {
-        background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
+        background: linear-gradient(135deg, #FFA726 0%, #E65100 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-size: 2.8rem;
         font-weight: 800;
         margin-bottom: 0.2rem;
-        text-shadow: 0 4px 20px rgba(0, 198, 255, 0.2);
+        text-shadow: 0 4px 20px rgba(230, 81, 0, 0.25);
     }
     
     .gradient-subtitle {
-        color: #8fa0c0;
+        color: #B0B0A8;
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
     
-    /* Custom container card style */
+    /* Custom container card style (Warm Gray-Brown) */
     .glass-card {
-        background: rgba(255, 255, 255, 0.03);
+        background-color: #2A2B2A;
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
     }
     
     /* Highlight indicators */
     .indicator-label {
         font-size: 0.85rem;
-        color: #8fa0c0;
+        color: #B0B0A8;
         margin-bottom: 4px;
     }
     
     .indicator-value {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #00C6FF;
+        color: #FFA726;
     }
     
     /* Secondary Buttons Styling */
     .stButton > button {
-        background-color: #1E293B !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        background-color: #2A2B2A !important;
+        color: #F1F0EA !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 8px !important;
-        transition: background-color 0.2s ease !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }
     .stButton > button:hover {
-        background-color: #334155 !important;
-        border-color: rgba(255, 255, 255, 0.4) !important;
+        background-color: #3C3D3C !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
     }
     
-    /* Primary Action CTA Button */
+    /* Primary Action CTA Button (Contour Line Orange) */
     div[data-testid="stButton"] button[kind="primary"] {
-        background: linear-gradient(135deg, #FF512F 0%, #DD2476 100%) !important;
-        color: white !important;
+        background: linear-gradient(135deg, #E65100 0%, #D97706 100%) !important;
+        color: #F1F0EA !important;
         border: none !important;
         font-weight: bold !important;
+        box-shadow: 0 4px 15px rgba(230, 81, 0, 0.3) !important;
+    }
+    div[data-testid="stButton"] button[kind="primary"]:hover {
+        box-shadow: 0 6px 20px rgba(230, 81, 0, 0.5) !important;
+        opacity: 0.95 !important;
     }
     
-    /* Download Button Center and Custom Blue Gradient */
+    /* Download Button Center and Cartographic Orange Gradient */
     div[data-testid="stDownloadButton"] {
         display: flex;
         justify-content: center;
         margin-top: 15px;
     }
     div[data-testid="stDownloadButton"] button {
-        background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%) !important;
-        color: white !important;
+        background: linear-gradient(135deg, #E65100 0%, #D97706 100%) !important;
+        color: #F1F0EA !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: 700 !important;
         padding: 12px 28px !important;
         font-size: 1.05rem !important;
-        box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(230, 81, 0, 0.3) !important;
         width: auto !important;
         min-width: 220px !important;
     }
     div[data-testid="stDownloadButton"] button:hover {
-        box-shadow: 0 6px 20px rgba(0, 114, 255, 0.5) !important;
+        box-shadow: 0 6px 20px rgba(230, 81, 0, 0.5) !important;
         opacity: 0.95 !important;
     }
     
     /* Elevate Slider and Input Label Contrast */
     div[data-testid="stWidgetLabel"] p {
-        color: #E2E8F0 !important;
+        color: #F1F0EA !important;
         font-weight: 600 !important;
         font-size: 0.95rem !important;
     }
-
+ 
     /* Autocomplete Dropdown List Container & Buttons */
     .autocomplete-dropdown {
-        background-color: #1E293B;
+        background-color: #2A2B2A;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         padding: 8px;
         margin-top: -10px;
         margin-bottom: 15px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
     .autocomplete-dropdown div[data-testid="stButton"] button {
         background-color: transparent !important;
-        color: #CBD5E1 !important;
+        color: #D1D0C9 !important;
         border: none !important;
         text-align: left !important;
         padding: 8px 12px !important;
@@ -147,7 +152,7 @@ st.markdown(
     }
     .autocomplete-dropdown div[data-testid="stButton"] button:hover {
         background-color: rgba(255, 255, 255, 0.05) !important;
-        color: #00C6FF !important;
+        color: #FFA726 !important;
     }
     </style>
     """,
@@ -257,9 +262,9 @@ with col_left:
     # Standardized locked-in selection card (Coordinate Handoff)
     st.markdown(
         f"""
-        <div style="background: rgba(0, 198, 255, 0.05); border: 1px solid rgba(0, 198, 255, 0.2); border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 15px;">
+        <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.2); border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 15px;">
             <div class="indicator-label">Locked-In Property:</div>
-            <div style="font-weight: 700; color: white; font-size: 0.95rem;">{st.session_state["selected_address"]}</div>
+            <div style="font-weight: 700; color: #F1F0EA; font-size: 0.95rem;">{st.session_state["selected_address"]}</div>
             <div class="indicator-label" style="margin-top: 4px;">Coordinate Handoff: {st.session_state["selected_coords"][0]:.5f}, {st.session_state["selected_coords"][1]:.5f}</div>
         </div>
         """,
@@ -344,7 +349,7 @@ with col_right:
         st.markdown("Configure your settings on the left and click **Generate 3D Model** to fetch Connecticut ImageServer LiDAR data and build a watertight STL terrain mesh.")
         st.markdown(
             """
-            <div style="background: rgba(0, 198, 255, 0.05); border: 1px solid rgba(0, 198, 255, 0.1); border-radius: 8px; padding: 16px; text-align: left; margin-top: 24px;">
+            <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.15); border-radius: 8px; padding: 16px; text-align: left; margin-top: 24px;">
             <strong>⚙️ OrcaSlicer & Creality K1 Recommendations:</strong><br>
             - Use the <strong>Arachne</strong> wall generator in OrcaSlicer to fill fine property edges cleanly.<br>
             - Tuned Outer Wall Acceleration: <strong>1000 - 1500 mm/s²</strong> and Outer Wall Speed: <strong>40 - 60 mm/s</strong> to eliminate vertical skirt ringing.

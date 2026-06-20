@@ -74,7 +74,7 @@ def create_plotly_visual(
             y=[pt[1] for pt in polygon_coords],
             z=[pt[2] for pt in polygon_coords],
             mode="lines",
-            line=dict(color="red", width=6),
+            line=dict(color="#E65100", width=6),
             name="Property Boundary"
         )
         traces.append(boundary_trace)
@@ -85,14 +85,14 @@ def create_plotly_visual(
     fig.update_layout(
         title=title,
         scene=dict(
-            xaxis=dict(title="Width (X mm)", gridcolor="lightgray"),
-            yaxis=dict(title="Length (Y mm)", gridcolor="lightgray"),
-            zaxis=dict(title="Elevation (Z mm)", gridcolor="lightgray"),
+            xaxis=dict(title="Width (X mm)", gridcolor="rgba(255, 255, 255, 0.1)"),
+            yaxis=dict(title="Length (Y mm)", gridcolor="rgba(255, 255, 255, 0.1)"),
+            zaxis=dict(title="Elevation (Z mm)", gridcolor="rgba(255, 255, 255, 0.1)"),
             aspectmode="data",  # Keep physical proportions correct!
-            bgcolor="rgb(10, 15, 30)"  # Sleek dark theme
+            bgcolor="#181A1B"  # Deep, earthy matte charcoal background
         ),
-        paper_bgcolor="rgb(10, 15, 30)",
-        font=dict(color="white"),
+        paper_bgcolor="#181A1B",
+        font=dict(color="#F1F0EA"),
         margin=dict(l=0, r=0, b=0, t=40)
     )
     
