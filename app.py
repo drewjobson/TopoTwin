@@ -21,79 +21,87 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom Glassmorphic Dark styling injection
+# Custom Glassmorphic Light styling injection
 st.markdown(
     """
     <style>
-    /* Earthy Matte Charcoal Theme styling */
+    /* Earthy Light Theme styling */
     .stApp {
-        background-color: #181A1B;
-        color: #F1F0EA;
+        background-color: #F3F4F6;
+        color: #1F2937;
     }
     
     /* Glowing Contour Title */
     .gradient-title {
-        background: linear-gradient(135deg, #FFA726 0%, #E65100 100%);
+        background: linear-gradient(135deg, #E65100 0%, #D97706 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-size: 2.8rem;
         font-weight: 800;
         margin-bottom: 0.2rem;
-        text-shadow: 0 4px 20px rgba(230, 81, 0, 0.25);
     }
     
     .gradient-subtitle {
-        color: #B0B0A8;
+        color: #4B5563;
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
     
-    /* Custom container card style (Warm Gray-Brown) */
+    /* Custom container card style (White) */
     .glass-card {
-        background-color: #2A2B2A;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background-color: #FFFFFF;
+        border: 1px solid #E5E7EB;
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 20px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    
+    /* Style the native Streamlit containers (White cards) */
+    div[data-testid="stVerticalBlockBorder"] {
+        background-color: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+        padding: 24px !important;
     }
     
     /* Highlight indicators */
     .indicator-label {
         font-size: 0.85rem;
-        color: #B0B0A8;
+        color: #4B5563;
         margin-bottom: 4px;
     }
     
     .indicator-value {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #FFA726;
+        color: #E65100;
     }
     
     /* Secondary Buttons Styling */
     .stButton > button {
-        background-color: #2A2B2A !important;
-        color: #F1F0EA !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        background-color: #FFFFFF !important;
+        color: #374151 !important;
+        border: 1px solid #D1D5DB !important;
         border-radius: 8px !important;
         transition: background-color 0.2s ease, border-color 0.2s ease !important;
     }
     .stButton > button:hover {
-        background-color: #3C3D3C !important;
-        border-color: rgba(255, 255, 255, 0.35) !important;
+        background-color: #F9FAFB !important;
+        border-color: #9CA3AF !important;
     }
     
     /* Primary Action CTA Button (Contour Line Orange) */
     div[data-testid="stButton"] button[kind="primary"] {
         background: linear-gradient(135deg, #E65100 0%, #D97706 100%) !important;
-        color: #F1F0EA !important;
+        color: #FFFFFF !important;
         border: none !important;
         font-weight: bold !important;
-        box-shadow: 0 4px 15px rgba(230, 81, 0, 0.3) !important;
+        box-shadow: 0 4px 6px -1px rgba(230, 81, 0, 0.2) !important;
     }
     div[data-testid="stButton"] button[kind="primary"]:hover {
-        box-shadow: 0 6px 20px rgba(230, 81, 0, 0.5) !important;
+        box-shadow: 0 10px 15px -3px rgba(230, 81, 0, 0.3) !important;
         opacity: 0.95 !important;
     }
     
@@ -105,41 +113,53 @@ st.markdown(
     }
     div[data-testid="stDownloadButton"] button {
         background: linear-gradient(135deg, #E65100 0%, #D97706 100%) !important;
-        color: #F1F0EA !important;
+        color: #FFFFFF !important;
         border: none !important;
         border-radius: 8px !important;
         font-weight: 700 !important;
         padding: 12px 28px !important;
         font-size: 1.05rem !important;
-        box-shadow: 0 4px 15px rgba(230, 81, 0, 0.3) !important;
+        box-shadow: 0 4px 6px -1px rgba(230, 81, 0, 0.2) !important;
         width: auto !important;
         min-width: 220px !important;
     }
     div[data-testid="stDownloadButton"] button:hover {
-        box-shadow: 0 6px 20px rgba(230, 81, 0, 0.5) !important;
+        box-shadow: 0 10px 15px -3px rgba(230, 81, 0, 0.3) !important;
         opacity: 0.95 !important;
     }
     
     /* Elevate Slider and Input Label Contrast */
     div[data-testid="stWidgetLabel"] p {
-        color: #F1F0EA !important;
+        color: #1F2937 !important;
         font-weight: 600 !important;
         font-size: 0.95rem !important;
+    }
+
+    /* Force Light theme input borders and text colors */
+    div[data-baseweb="input"] {
+        background-color: #FFFFFF !important;
+        border-color: #D1D5DB !important;
+        color: #1F2937 !important;
+    }
+    input {
+        color: #1F2937 !important;
+        background-color: #FFFFFF !important;
     }
  
     /* Autocomplete Dropdown List Container & Buttons */
     .autocomplete-dropdown {
-        background-color: #2A2B2A;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #FFFFFF;
+        border: 1px solid #E5E7EB;
         border-radius: 8px;
         padding: 8px;
         margin-top: -10px;
         margin-bottom: 15px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 100;
     }
     .autocomplete-dropdown div[data-testid="stButton"] button {
         background-color: transparent !important;
-        color: #D1D0C9 !important;
+        color: #374151 !important;
         border: none !important;
         text-align: left !important;
         padding: 8px 12px !important;
@@ -151,8 +171,8 @@ st.markdown(
         margin: 0 !important;
     }
     .autocomplete-dropdown div[data-testid="stButton"] button:hover {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: #FFA726 !important;
+        background-color: #F3F4F6 !important;
+        color: #E65100 !important;
     }
     </style>
     """,
@@ -230,134 +250,135 @@ st.markdown('<div class="gradient-subtitle">Statewide Connecticut 2-Foot LiDAR E
 col_left, col_right = st.columns([1, 2], gap="large")
 
 with col_left:
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    st.subheader("1. Address Search")
-    
-    address_input = st.text_input(
-        "Search Connecticut Address (Autocomplete):",
-        value=st.session_state["search_query"],
-        help="Start typing any Connecticut address. Select the matching address from the dropdown list."
-    )
-    
-    cleaned_query = clean_address(address_input)
-    
-    # Live Autocomplete Dropdown list
-    suggestions = []
-    if len(cleaned_query) >= 3:
-        suggestions = get_arcgis_suggestions(cleaned_query)
+    with st.container(border=True):
+        st.subheader("1. Address Search")
         
-    if suggestions:
-        st.markdown('<div class="autocomplete-dropdown">', unsafe_allow_html=True)
-        for idx, sug in enumerate(suggestions[:5]):
-            if st.button(f"📍 {sug['text']}", key=f"sug_{idx}", use_container_width=True):
-                resolved = resolve_arcgis_magic_key(sug["magicKey"], sug["text"])
-                if resolved:
-                    lat, lon, full_addr = resolved
-                    st.session_state["selected_address"] = full_addr
-                    st.session_state["selected_coords"] = (lat, lon)
-                    st.session_state["search_query"] = sug["text"]
-                    st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        address_input = st.text_input(
+            "Search Connecticut Address (Autocomplete):",
+            value=st.session_state["search_query"],
+            help="Start typing any Connecticut address. Select the matching address from the dropdown list."
+        )
         
-    # Standardized locked-in selection card (Coordinate Handoff)
-    st.markdown(
-        f"""
-        <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.2); border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 15px;">
-            <div class="indicator-label">Locked-In Property:</div>
-            <div style="font-weight: 700; color: #F1F0EA; font-size: 0.95rem;">{st.session_state["selected_address"]}</div>
-            <div class="indicator-label" style="margin-top: 4px;">Coordinate Handoff: {st.session_state["selected_coords"][0]:.5f}, {st.session_state["selected_coords"][1]:.5f}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        cleaned_query = clean_address(address_input)
         
-    st.markdown("**Try these municipal examples:**")
-    col_ex1, col_ex2 = st.columns(2)
-    with col_ex1:
-        if st.button("Clinton Town Hall"):
-            st.session_state["selected_address"] = "242 E Main St, Clinton, Connecticut, 06413"
-            st.session_state["selected_coords"] = (41.27137, -72.50441)
-            st.session_state["search_query"] = "242 East Main Street, Clinton, CT"
-            st.rerun()
-    with col_ex2:
-        if st.button("Hartford City Hall"):
-            st.session_state["selected_address"] = "550 Main St, Hartford, Connecticut, 06103"
-            st.session_state["selected_coords"] = (41.76249, -72.67324)
-            st.session_state["search_query"] = "550 Main Street, Hartford, CT"
-            st.rerun()
+        # Live Autocomplete Dropdown list
+        suggestions = []
+        if len(cleaned_query) >= 3:
+            suggestions = get_arcgis_suggestions(cleaned_query)
             
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    st.subheader("2. Model & Fidelity Settings")
-    
-    resolution = st.slider(
-        "Grid Resolution (Fidelity):",
-        min_value=15,
-        max_value=120,
-        value=45,
-        step=5,
-        help="Higher values increase triangle density (fidelity) for architects but increase DEM sampling duration."
-    )
-    
-    z_exaggeration = st.slider(
-        "Vertical Z-Exaggeration:",
-        min_value=0.5,
-        max_value=4.0,
-        value=2.0,
-        step=0.1,
-        help="Scales elevation features to make topography more visible."
-    )
-    
-    col_width, col_base = st.columns(2)
-    with col_width:
-        model_width_mm = st.number_input(
-            "Print Width (mm):",
-            min_value=30.0,
-            max_value=250.0,
-            value=100.0,
-            step=10.0,
-            help="Physical output model width in millimeters."
-        )
-    with col_base:
-        base_thickness_mm = st.number_input(
-            "Base Thickness (mm):",
-            min_value=1.0,
-            max_value=10.0,
-            value=3.0,
-            step=0.5,
-            help="Solid vertical padding added beneath the minimum elevation level."
-        )
-        
-    if model_width_mm > 220.0:
-        st.warning(f"⚠️ **Hardware Constraint Warning**: A print width of {model_width_mm:.0f}mm exceeds the standard build volume of a Creality K1 (220mm). The model will require manual scaling down in OrcaSlicer to print successfully.")
-        
-    clip_to_parcel = st.checkbox(
-        "Clip strictly to Legal Parcel Boundaries",
-        value=True,
-        help="Uncheck to generate a standard rectangular terrain tile instead."
-    )
-    
-    generate_btn = st.button("Generate 3D Model", type="primary", use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with col_right:
-    if not generate_btn:
-        st.markdown('<div class="glass-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">', unsafe_allow_html=True)
-        st.image("https://img.icons8.com/color/96/3d-model.png")
-        st.markdown("### Ready to Generate")
-        st.markdown("Configure your settings on the left and click **Generate 3D Model** to fetch Connecticut ImageServer LiDAR data and build a watertight STL terrain mesh.")
+        if suggestions:
+            st.markdown('<div class="autocomplete-dropdown">', unsafe_allow_html=True)
+            for idx, sug in enumerate(suggestions[:5]):
+                if st.button(f"📍 {sug['text']}", key=f"sug_{idx}", use_container_width=True):
+                    resolved = resolve_arcgis_magic_key(sug["magicKey"], sug["text"])
+                    if resolved:
+                        lat, lon, full_addr = resolved
+                        st.session_state["selected_address"] = full_addr
+                        st.session_state["selected_coords"] = (lat, lon)
+                        st.session_state["search_query"] = sug["text"]
+                        st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+        # Standardized locked-in selection card (Coordinate Handoff)
         st.markdown(
-            """
-            <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.15); border-radius: 8px; padding: 16px; text-align: left; margin-top: 24px;">
-            <strong>⚙️ OrcaSlicer & Creality K1 Recommendations:</strong><br>
-            - Use the <strong>Arachne</strong> wall generator in OrcaSlicer to fill fine property edges cleanly.<br>
-            - Tuned Outer Wall Acceleration: <strong>1000 - 1500 mm/s²</strong> and Outer Wall Speed: <strong>40 - 60 mm/s</strong> to eliminate vertical skirt ringing.
+            f"""
+            <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.2); border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 15px;">
+                <div class="indicator-label">Locked-In Property:</div>
+                <div style="font-weight: 700; color: #1F2937; font-size: 0.95rem;">{st.session_state["selected_address"]}</div>
+                <div class="indicator-label" style="margin-top: 4px;">Coordinate Handoff: {st.session_state["selected_coords"][0]:.5f}, {st.session_state["selected_coords"][1]:.5f}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
-        st.markdown("</div>", unsafe_allow_html=True)
+            
+        st.markdown("**Try these municipal examples:**")
+        col_ex1, col_ex2 = st.columns(2)
+        with col_ex1:
+            if st.button("Clinton Town Hall"):
+                st.session_state["selected_address"] = "242 E Main St, Clinton, Connecticut, 06413"
+                st.session_state["selected_coords"] = (41.27137, -72.50441)
+                st.session_state["search_query"] = "242 East Main Street, Clinton, CT"
+                st.rerun()
+        with col_ex2:
+            if st.button("Hartford City Hall"):
+                st.session_state["selected_address"] = "550 Main St, Hartford, Connecticut, 06103"
+                st.session_state["selected_coords"] = (41.76249, -72.67324)
+                st.session_state["search_query"] = "550 Main Street, Hartford, CT"
+                st.rerun()
+
+    # Spacing between containers
+    st.write("")
+
+    with st.container(border=True):
+        st.subheader("2. Model & Fidelity Settings")
+        
+        resolution = st.slider(
+            "Grid Resolution (Fidelity):",
+            min_value=15,
+            max_value=120,
+            value=45,
+            step=5,
+            help="Higher values increase triangle density (fidelity) for architects but increase DEM sampling duration."
+        )
+        
+        z_exaggeration = st.slider(
+            "Vertical Z-Exaggeration:",
+            min_value=0.5,
+            max_value=4.0,
+            value=2.0,
+            step=0.1,
+            help="Scales elevation features to make topography more visible."
+        )
+        
+        col_width, col_base = st.columns(2)
+        with col_width:
+            model_width_mm = st.number_input(
+                "Print Width (mm):",
+                min_value=30.0,
+                max_value=250.0,
+                value=100.0,
+                step=10.0,
+                help="Physical output model width in millimeters."
+            )
+        with col_base:
+            base_thickness_mm = st.number_input(
+                "Base Thickness (mm):",
+                min_value=1.0,
+                max_value=10.0,
+                value=3.0,
+                step=0.5,
+                help="Solid vertical padding added beneath the minimum elevation level."
+            )
+            
+        if model_width_mm > 220.0:
+            st.warning(f"⚠️ **Hardware Constraint Warning**: A print width of {model_width_mm:.0f}mm exceeds the standard build volume of a Creality K1 (220mm). The model will require manual scaling down in OrcaSlicer to print successfully.")
+            
+        clip_to_parcel = st.checkbox(
+            "Clip strictly to Legal Parcel Boundaries",
+            value=True,
+            help="Uncheck to generate a standard rectangular terrain tile instead."
+        )
+        
+        generate_btn = st.button("Generate 3D Model", type="primary", use_container_width=True)
+
+with col_right:
+    if not generate_btn:
+        with st.container(border=True):
+            st.markdown("<div style='text-align: center; padding: 40px 20px;'>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size: 5rem; line-height: 1;'>🏔️</div>", unsafe_allow_html=True)
+            st.markdown("<h3 style='margin-top: 20px; color: #1F2937;'>Ready to Generate</h3>", unsafe_allow_html=True)
+            st.markdown("<p style='color: #4B5563;'>Configure your settings on the left and click <strong>Generate 3D Model</strong> to fetch Connecticut ImageServer LiDAR data and build a watertight STL terrain mesh.</p>", unsafe_allow_html=True)
+            st.markdown(
+                """
+                <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.15); border-radius: 8px; padding: 16px; text-align: left; margin-top: 24px; color: #1F2937;">
+                <strong>⚙️ OrcaSlicer & Creality K1 Recommendations:</strong><br>
+                - Use the <strong>Arachne</strong> wall generator in OrcaSlicer to fill fine property edges cleanly.<br>
+                - Tuned Outer Wall Acceleration: <strong>1000 - 1500 mm/s²</strong> and Outer Wall Speed: <strong>40 - 60 mm/s</strong> to eliminate vertical skirt ringing.
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            st.markdown("</div>", unsafe_allow_html=True)
     else:
         # Run Pipeline Live
         progress_bar = st.progress(0)
