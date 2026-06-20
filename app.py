@@ -70,6 +70,57 @@ st.markdown(
         font-weight: 700;
         color: #00C6FF;
     }
+    
+    /* Secondary Buttons Styling */
+    .stButton > button {
+        background-color: #1E293B !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 8px !important;
+        transition: background-color 0.2s ease !important;
+    }
+    .stButton > button:hover {
+        background-color: #334155 !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+    }
+    
+    /* Primary Action CTA Button */
+    div[data-testid="stButton"] button[kind="primary"] {
+        background: linear-gradient(135deg, #FF512F 0%, #DD2476 100%) !important;
+        color: white !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    
+    /* Download Button Center and Custom Blue Gradient */
+    div[data-testid="stDownloadButton"] {
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+    }
+    div[data-testid="stDownloadButton"] button {
+        background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        padding: 12px 28px !important;
+        font-size: 1.05rem !important;
+        box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3) !important;
+        width: auto !important;
+        min-width: 220px !important;
+    }
+    div[data-testid="stDownloadButton"] button:hover {
+        box-shadow: 0 6px 20px rgba(0, 114, 255, 0.5) !important;
+        opacity: 0.95 !important;
+    }
+    
+    /* Elevate Slider and Input Label Contrast */
+    div[data-testid="stWidgetLabel"] p {
+        color: #E2E8F0 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -159,6 +210,9 @@ with col_left:
             step=0.5,
             help="Solid vertical padding added beneath the minimum elevation level."
         )
+        
+    if model_width_mm > 220.0:
+        st.warning(f"⚠️ **Hardware Constraint Warning**: A print width of {model_width_mm:.0f}mm exceeds the standard build volume of a Creality K1 (220mm). The model will require manual scaling down in OrcaSlicer to print successfully.")
         
     clip_to_parcel = st.checkbox(
         "Clip strictly to Legal Parcel Boundaries",
@@ -426,11 +480,11 @@ with col_right:
         stl_bytes = trimesh_mesh.export(file_type='stl')
         
         st.download_button(
-            label="💾 Download Watertight STL File",
+            label="💾 Download .STL",
             data=stl_bytes,
             file_name=f"topo_{cleaned.replace(' ', '_').replace(',', '')}.stl",
             mime="application/sla",
-            use_container_width=True
+            use_container_width=False
         )
         
         status_text.text("Generation completed successfully!")
