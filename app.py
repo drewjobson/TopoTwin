@@ -121,6 +121,34 @@ st.markdown(
         font-weight: 600 !important;
         font-size: 0.95rem !important;
     }
+
+    /* Autocomplete Dropdown List Container & Buttons */
+    .autocomplete-dropdown {
+        background-color: #1E293B;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 8px;
+        margin-top: -10px;
+        margin-bottom: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+    .autocomplete-dropdown div[data-testid="stButton"] button {
+        background-color: transparent !important;
+        color: #CBD5E1 !important;
+        border: none !important;
+        text-align: left !important;
+        padding: 8px 12px !important;
+        border-radius: 4px !important;
+        font-size: 0.9rem !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    .autocomplete-dropdown div[data-testid="stButton"] button:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #00C6FF !important;
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -135,6 +163,60 @@ def run_async_loop(coro):
     finally:
         loop.close()
 
+# ArcGIS suggest endpoints for CT-bounded real-time autocomplete
+def get_arcgis_suggestions(text: str) -> list:
+    if len(text) < 3:
+        return []
+    url = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest"
+    params = {
+        "f": "json",
+        "text": text,
+        "searchExtent": "-73.727,40.982,-71.786,42.050",
+        "maxSuggestions": 5
+    }
+    try:
+        import requests
+        r = requests.get(url, params=params, timeout=4)
+        if r.status_code == 200:
+            return r.json().get("suggestions", [])
+    except Exception:
+        pass
+    return []
+
+def resolve_arcgis_magic_key(magic_key: str, text: str) -> tuple[float, float, str] | None:
+    url = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates"
+    params = {
+        "f": "json",
+        "magicKey": magic_key,
+        "singleLine": text,
+        "maxLocations": 1
+    }
+    try:
+        import requests
+        r = requests.get(url, params=params, timeout=4)
+        if r.status_code == 200:
+            data = r.json()
+            candidates = data.get("candidates", [])
+            if candidates:
+                candidate = candidates[0]
+                loc = candidate.get("location", {})
+                lon = loc.get("x")
+                lat = loc.get("y")
+                addr = candidate.get("address")
+                if lat is not None and lon is not None:
+                    return float(lat), float(lon), str(addr)
+    except Exception:
+        pass
+    return None
+
+# Initialize Session States for Autocomplete Handoff
+if "selected_address" not in st.session_state:
+    st.session_state["selected_address"] = "242 E Main St, Clinton, Connecticut, 06413"
+if "selected_coords" not in st.session_state:
+    st.session_state["selected_coords"] = (41.27137, -72.50441)
+if "search_query" not in st.session_state:
+    st.session_state["search_query"] = "242 East Main Street, Clinton, CT"
+
 # App Header
 st.markdown('<div class="gradient-title">🌟 TopoPlot 3D Terrain Generator</div>', unsafe_allow_html=True)
 st.markdown('<div class="gradient-subtitle">Statewide Connecticut 2-Foot LiDAR Exact-Parcel Mesh Engine</div>', unsafe_allow_html=True)
@@ -147,25 +229,56 @@ with col_left:
     st.subheader("1. Address Search")
     
     address_input = st.text_input(
-        "Enter Connecticut Address:",
-        value="242 East Main Street, Clinton, CT",
-        help="Type any Connecticut address. Apartment or suite designations will be parsed out automatically."
+        "Search Connecticut Address (Autocomplete):",
+        value=st.session_state["search_query"],
+        help="Start typing any Connecticut address. Select the matching address from the dropdown list."
     )
     
-    # Address Sanitization check
-    cleaned = clean_address(address_input)
-    if cleaned != address_input:
-        st.warning(f"⚠️ Unit designation detected. Searching for parent parcel at: **'{cleaned}'**")
+    cleaned_query = clean_address(address_input)
+    
+    # Live Autocomplete Dropdown list
+    suggestions = []
+    if len(cleaned_query) >= 3:
+        suggestions = get_arcgis_suggestions(cleaned_query)
+        
+    if suggestions:
+        st.markdown('<div class="autocomplete-dropdown">', unsafe_allow_html=True)
+        for idx, sug in enumerate(suggestions[:5]):
+            if st.button(f"📍 {sug['text']}", key=f"sug_{idx}", use_container_width=True):
+                resolved = resolve_arcgis_magic_key(sug["magicKey"], sug["text"])
+                if resolved:
+                    lat, lon, full_addr = resolved
+                    st.session_state["selected_address"] = full_addr
+                    st.session_state["selected_coords"] = (lat, lon)
+                    st.session_state["search_query"] = sug["text"]
+                    st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+    # Standardized locked-in selection card (Coordinate Handoff)
+    st.markdown(
+        f"""
+        <div style="background: rgba(0, 198, 255, 0.05); border: 1px solid rgba(0, 198, 255, 0.2); border-radius: 8px; padding: 12px; margin-top: 10px; margin-bottom: 15px;">
+            <div class="indicator-label">Locked-In Property:</div>
+            <div style="font-weight: 700; color: white; font-size: 0.95rem;">{st.session_state["selected_address"]}</div>
+            <div class="indicator-label" style="margin-top: 4px;">Coordinate Handoff: {st.session_state["selected_coords"][0]:.5f}, {st.session_state["selected_coords"][1]:.5f}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
         
     st.markdown("**Try these municipal examples:**")
     col_ex1, col_ex2 = st.columns(2)
     with col_ex1:
         if st.button("Clinton Town Hall"):
-            address_input = "242 East Main Street, Clinton, CT"
+            st.session_state["selected_address"] = "242 E Main St, Clinton, Connecticut, 06413"
+            st.session_state["selected_coords"] = (41.27137, -72.50441)
+            st.session_state["search_query"] = "242 East Main Street, Clinton, CT"
             st.rerun()
     with col_ex2:
         if st.button("Hartford City Hall"):
-            address_input = "550 Main Street, Hartford, CT"
+            st.session_state["selected_address"] = "550 Main St, Hartford, Connecticut, 06103"
+            st.session_state["selected_coords"] = (41.76249, -72.67324)
+            st.session_state["search_query"] = "550 Main Street, Hartford, CT"
             st.rerun()
             
     st.markdown("</div>", unsafe_allow_html=True)
@@ -245,16 +358,13 @@ with col_right:
         progress_bar = st.progress(0)
         status_text = st.empty()
         
-        # 1. Geocode
-        status_text.text("🔄 Geocoding address...")
+        # 1. Coordinate Handoff (skips server geocoding)
+        status_text.text("🔄 Locked in coordinates via handoff...")
         progress_bar.progress(15)
         
-        try:
-            lat, lon, resolved_name = geocode_address(cleaned)
-            st.info(f"📍 **Resolved Location:** {resolved_name} (Coords: {lat:.6f}, {lon:.6f})")
-        except Exception as e:
-            st.error(f"❌ Geocoding Error: {e}")
-            st.stop()
+        lat, lon = st.session_state["selected_coords"]
+        resolved_name = st.session_state["selected_address"]
+        st.info(f"📍 **Target Location:** {resolved_name} (Coords: {lat:.6f}, {lon:.6f})")
             
         # 2. Parcel query
         parcel_info = None
