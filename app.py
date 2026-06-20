@@ -492,13 +492,38 @@ with col_right:
                 validated = True
                 break
             else:
+                # Try topological repair in-place via trimesh
+                try:
+                    import trimesh
+                    import trimesh.repair as repair
+                    st.info("🔄 Attempting automatic topological repair using Trimesh...")
+                    mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=True)
+                    repair.fill_holes(mesh)
+                    repair.fix_winding(mesh)
+                    repair.fix_normals(mesh)
+                    repair.fix_inversion(mesh)
+                    
+                    if mesh.is_watertight and mesh.volume > 0:
+                        vertices = mesh.vertices.astype(np.float32)
+                        faces = mesh.faces.astype(np.int32)
+                        # Re-run validation to get updated volume and success indicators
+                        validation = validate_mesh(vertices, faces)
+                        if validation["valid"]:
+                            st.success("✅ Mesh successfully repaired topologically!")
+                            validated = True
+                            break
+                except Exception as repair_err:
+                    st.warning(f"⚠️ Automatic topological repair failed: {repair_err}")
+
                 if attempt < max_repair_attempts:
                     base_thickness_mm += 1.0
-                    st.warning(f"⚠️ Validation attempt {attempt} failed (open edges or volume). Auto-repair: increasing base thickness to {base_thickness_mm}mm and rebuilding...")
+                    st.warning(f"⚠️ Validation attempt {attempt} failed ({validation['errors']}). Auto-repair: increasing base thickness to {base_thickness_mm}mm and rebuilding...")
                     attempt += 1
                 else:
                     st.error(f"❌ Mesh Validation Failed after {max_repair_attempts} attempts: {validation['errors']}")
-                    st.stop()
+                    st.warning("⚠️ **Proceeding with Non-Watertight Mesh**: The 3D model is shown below and can be downloaded, but it may contain open edges or non-manifold vertices.")
+                    validated = True
+                    break
                     
         # 5. Success outputs
         status_text.text("✓ Generation Complete!")
