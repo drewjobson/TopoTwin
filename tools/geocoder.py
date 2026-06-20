@@ -1,4 +1,6 @@
 import time
+import re
+import requests
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderServiceError
 
@@ -9,8 +11,6 @@ US_BOUNDS = {
     "lon_min": -180.0,
     "lon_max": -66.0
 }
-
-import re
 
 def clean_address(address: str) -> str:
     """Cleans an address by stripping out unit/apartment/suite/floor designations
@@ -30,6 +30,36 @@ def clean_address(address: str) -> str:
     cleaned = cleaned.strip()
     
     return cleaned
+
+def geocode_via_arcgis(address: str) -> tuple[float, float, str] | None:
+    """Attempts to geocode an address using the keyless ArcGIS World Geocoding Service.
+    
+    Returns:
+        tuple: (latitude, longitude, display_name) or None if geocoding fails.
+    """
+    url = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates"
+    params = {
+        "f": "json",
+        "singleLine": address,
+        "maxLocations": 1
+    }
+    try:
+        r = requests.get(url, params=params, timeout=8)
+        if r.status_code == 200:
+            data = r.json()
+            candidates = data.get("candidates", [])
+            if candidates:
+                candidate = candidates[0]
+                loc = candidate.get("location", {})
+                lon = loc.get("x")
+                lat = loc.get("y")
+                addr = candidate.get("address")
+                if lat is not None and lon is not None:
+                    return float(lat), float(lon), str(addr)
+        return None
+    except Exception as e:
+        print(f"  ArcGIS geocoding attempt raised exception: {e}")
+        return None
 
 def geocode_address(address: str, user_agent: str = "topotwin_agent") -> tuple[float, float, str]:
     """Resolves an address string into (latitude, longitude, display_name).
@@ -53,9 +83,18 @@ def geocode_address(address: str, user_agent: str = "topotwin_agent") -> tuple[f
         print(f"  Cleaned address: '{address}' -> '{cleaned_address}'")
         address = cleaned_address
 
+    # 1. Try ArcGIS Geocoding first (fast, robust, and highly reliable)
+    print(f"  Attempting geocoding via ArcGIS World Geocode Service...")
+    arcgis_res = geocode_via_arcgis(address)
+    if arcgis_res:
+        lat, lon, display_name = arcgis_res
+        if US_BOUNDS["lat_min"] <= lat <= US_BOUNDS["lat_max"] and US_BOUNDS["lon_min"] <= lon <= US_BOUNDS["lon_max"]:
+            return lat, lon, display_name
+
+    # 2. Fall back to Nominatim (OpenStreetMap) if ArcGIS failed
+    print(f"  ArcGIS geocoder failed or returned out-of-bounds. Falling back to Nominatim...")
     geolocator = Nominatim(user_agent=user_agent)
     
-    # Try geocoding with up to 3 retries (Nominatim can be occasionally rate-limited)
     last_err = None
     for attempt in range(3):
         try:
