@@ -88,7 +88,7 @@ class DEMDownloader:
                         elevations = [-9999.0] * len(points_chunk)
                         
                     return elevations
-            except Exception:
+            except (aiohttp.ClientError, asyncio.TimeoutError, ConnectionError, ValueError) as e:
                 if attempt == retries - 1:
                     return [-9999.0] * len(points_chunk)
                 await asyncio.sleep(0.5 * (attempt + 1))
@@ -157,7 +157,7 @@ def fetch_point_elevation(lat: float, lon: float, attempt: int = 1, max_retries:
                     pass
             raise ValueError(f"Invalid USGS response: {data}")
         response.raise_for_status()
-    except Exception:
+    except (requests.RequestException, ValueError, KeyError):
         if attempt < max_retries:
             import time
             time.sleep(0.5 * attempt)

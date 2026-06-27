@@ -22,8 +22,8 @@ ambient-expense-agent/
 test_*.stl
 test_*.html
 eval_output_*.stl
-clinton_9_marian_test.stl
-clinton_9_marian_test.html
+clinton_9_hilltop_test.stl
+clinton_9_hilltop_test.html
 test_repair.stl
 test_repair.html
 test_visual.html

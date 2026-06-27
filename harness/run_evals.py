@@ -8,7 +8,7 @@ import trimesh
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tools.dem_downloader import get_elevation_grid
-from tools.mesh_builder import build_solid_mesh
+from tools.mesh_builder import build_solid_mesh, triangles_to_mesh
 from harness.validator import validate_mesh
 from tools.stl_writer import write_binary_stl
 
@@ -100,20 +100,7 @@ def run_evaluation_suite(resolution: int = 20) -> bool:
         # 3. Validate Mesh
         # Convert triangles list to vertices/faces arrays for the new validate_mesh signature
         try:
-            unique_verts = []
-            unique_verts_map = {}
-            faces = []
-            for tri in triangles:
-                face_idx = []
-                for v in tri:
-                    v_rounded = (round(v[0], 5), round(v[1], 5), round(v[2], 5))
-                    if v_rounded not in unique_verts_map:
-                        unique_verts_map[v_rounded] = len(unique_verts)
-                        unique_verts.append(v)
-                    face_idx.append(unique_verts_map[v_rounded])
-                faces.append(face_idx)
-            vertices = np.array(unique_verts, dtype=np.float32)
-            faces = np.array(faces, dtype=np.int32)
+            vertices, faces = triangles_to_mesh(triangles)
             
             validation = validate_mesh(vertices, faces)
             total_time = time.time() - start_time

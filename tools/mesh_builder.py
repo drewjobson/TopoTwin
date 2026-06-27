@@ -267,3 +267,32 @@ def build_solid_mesh(
         add_wall_quad(X[r, 0], Y[r, 0], Z[r, 0], X[r-1, 0], Y[r-1, 0], Z[r-1, 0])
         
     return triangles
+
+def triangles_to_mesh(triangles) -> tuple[np.ndarray, np.ndarray]:
+    """Convert a list of triangle tuples (each containing 3 vertices of 3 coordinates)
+    into a tuple of (vertices, faces) numpy arrays, merging duplicate vertices.
+    """
+    unique_verts = []
+    unique_verts_map = {}
+    faces = []
+    for tri in triangles:
+        face_idx = []
+        for v in tri:
+            v_rounded = (round(v[0], 5), round(v[1], 5), round(v[2], 5))
+            if v_rounded not in unique_verts_map:
+                unique_verts_map[v_rounded] = len(unique_verts)
+                unique_verts.append(v)
+            face_idx.append(unique_verts_map[v_rounded])
+        faces.append(face_idx)
+    vertices = np.array(unique_verts, dtype=np.float32)
+    faces = np.array(faces, dtype=np.int32)
+    return vertices, faces
+
+def mesh_to_triangles(vertices: np.ndarray, faces: np.ndarray) -> list:
+    """Convert (vertices, faces) arrays back to list of triangle tuples."""
+    return [
+        (tuple(vertices[f[0]]), tuple(vertices[f[1]]), tuple(vertices[f[2]]))
+        for f in faces
+    ]
+
+

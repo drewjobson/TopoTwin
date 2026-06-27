@@ -42,6 +42,6 @@ $$\text{Agent} = \text{Model} + \text{Harness}$$
 
 ## 3. TopoPlot Implementation & Learning Demonstration
 In the TopoPlot workspace, we demonstrate the learnings of this whitepaper through:
-1. **Model + Harness Architecture:** TopoPlot wraps the Gemini model in a robust harness consisting of a custom testing suit (`harness/run_evals.py`), a telemetry logger (`vibe_trajectory.jsonl`), and strict specifications ([specs/topo_spec.md](file:///c:/Users/jobbe/OneDrive/Desktop/programming/AntiGravity/Kaggle5Day/specs/topo_spec.md)).
+1. **Model + Harness Architecture:** TopoPlot wraps the Gemini model in a robust harness consisting of a custom testing suit (`harness/run_evals.py`), a telemetry logger (`vibe_trajectory.jsonl`), and strict specifications ([specs/topo_spec.md](../topo_spec.md)).
 2. **Shift-Left Correctness Verification:** The orchestrator automatically runs a validation loop after mesh generation, programmatically verifying geometry watertightness and signed volume.
 3. **Agentic Engineering over Vibe Coding:** Rather than relying on simple, ad-hoc prompts to write GIS and geometry code, we defined a structured self-repair mechanism that automatically corrects code errors.

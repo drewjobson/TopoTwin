@@ -38,6 +38,6 @@ Because AI agents can execute arbitrary commands and generate security vulnerabi
 
 ## 3. TopoPlot Implementation & Learning Demonstration
 In the TopoPlot workspace, we demonstrate the learnings of this whitepaper through:
-1. **Behavior-Driven Specifications:** [specs/topo_spec.md](file:///c:/Users/jobbe/OneDrive/Desktop/programming/AntiGravity/Kaggle5Day/specs/topo_spec.md) defines the blueprint using Gherkin syntax (Given-When-Then), providing clear, testable scenarios for address resolution, boundary extrusion, mesh validation, and policy gating.
+1. **Behavior-Driven Specifications:** [specs/topo_spec.md](../topo_spec.md) defines the blueprint using Gherkin syntax (Given-When-Then), providing clear, testable scenarios for address resolution, boundary extrusion, mesh validation, and policy gating.
 2. **Policy-Driven Gating:** The agent implements structural and semantic gating, preventing sensitive operations or out-of-bounds queries at the orchestrator layer.
 3. **Validation-Driven Self-Repair:** The codebase implements a validation-driven self-repair loop where failed geometric checks (e.g., watertightness) trigger automated parameter adjustments and mesh rebuilding.

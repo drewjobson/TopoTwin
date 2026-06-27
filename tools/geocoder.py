@@ -57,8 +57,9 @@ def geocode_via_arcgis(address: str) -> tuple[float, float, str] | None:
                 if lat is not None and lon is not None:
                     return float(lat), float(lon), str(addr)
         return None
-    except Exception as e:
-        print(f"  ArcGIS geocoding attempt raised exception: {e}")
+    except (requests.RequestException, ValueError, KeyError) as e:
+        import logging
+        logging.warning(f"ArcGIS geocoding attempt failed: {e}")
         return None
 
 def geocode_address(address: str, user_agent: str = "topotwin_agent") -> tuple[float, float, str]:

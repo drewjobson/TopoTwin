@@ -113,9 +113,11 @@ def query_ct_parcel(lat: float, lon: float, force_format: str = None) -> dict | 
         "geometryType": "esriGeometryPoint",
         "inSR": "4326",
         "spatialRel": "esriSpatialRelIntersects",
+        "distance": "15",
+        "units": "esriSRUnit_Meter",
         "outFields": "*",
         "returnGeometry": "true",
-        "outSR": "6434"
+        "outSR": "2234"
     }
     
     try_geojson = force_format != "json"
@@ -167,25 +169,93 @@ def query_ct_parcel(lat: float, lon: float, force_format: str = None) -> dict | 
     if not features:
         return None
         
-    feature = features[0]
-    geom = feature.get("geometry", {})
+    # Project the query point to EPSG:6434 for distance calculations
+    from pyproj import Transformer
+    from shapely.geometry import Point
+    transformer_to_6434 = Transformer.from_crs("EPSG:4326", "EPSG:6434", always_xy=True)
+    x_query, y_query = transformer_to_6434.transform(lon, lat)
+    p_query = Point(x_query, y_query)
+
+    # Project candidate geometries from EPSG:2234 to EPSG:6434
+    transformer_2234_to_6434 = Transformer.from_crs("EPSG:2234", "EPSG:6434", always_xy=True)
+    from shapely.ops import transform
+    from shapely.geometry import shape, mapping
+
+    candidates = []
+    for f in features:
+        props = f.get("properties") or f.get("attributes") or {}
+        
+        # Standardize field lookups
+        owner = props.get("Owner1") or props.get("OWNER") or props.get("Owner") or ""
+        addr = props.get("Location_1") or props.get("Location") or props.get("SiteAddress") or props.get("LOC_ADR") or ""
+        parcel_id = props.get("Mbl") or props.get("PARCEL_ID") or props.get("Map_Block_Lot") or ""
+        parcel_typ = str(props.get("Parcel_Typ") or "").upper()
+        
+        owner_str = str(owner).upper()
+        addr_str = str(addr).upper()
+        parcel_id_str = str(parcel_id).upper()
+        
+        # Detect Right-Of-Way (road network)
+        is_row = (
+            parcel_typ == "ROW" or
+            parcel_id_str == "ROW" or
+            "RIGHT OF WAY" in owner_str or
+            "RIGHT-OF-WAY" in owner_str or
+            "TOWN ROAD" in owner_str or
+            "STATE OF CONNECTICUT (ROW)" in owner_str or
+            (owner_str == "UNKNOWN" and addr_str == "UNKNOWN" and parcel_id_str == "UNKNOWN") or
+            (not owner and not addr and not parcel_id)
+        )
+        
+        if is_row:
+            print(f"  Skipping municipal Right-of-Way feature in search buffer for '{addr or 'Unknown Road'}'...")
+            continue
+            
+        geom = f.get("geometry", {})
+        try:
+            if "rings" in geom:
+                shapely_geom = esri_geometry_to_shapely(geom)
+            else:
+                shapely_geom = shape(geom)
+                
+            shapely_geom_6434 = transform(transformer_2234_to_6434.transform, shapely_geom)
+            dist_ft = p_query.distance(shapely_geom_6434)
+            candidates.append((dist_ft, f, shapely_geom_6434))
+        except Exception as e:
+            print(f"  Error parsing or transforming geometry for '{addr}': {e}")
+            continue
+
+    if candidates:
+        # Sort by distance (closest first)
+        candidates.sort(key=lambda x: x[0])
+        dist_ft, feature, shapely_geom_6434 = candidates[0]
+        addr_selected = (
+            feature.get("properties", {}).get("Location_1") or 
+            feature.get("attributes", {}).get("Location_1") or 
+            "Unknown Address"
+        )
+        print(f"  Selected closest residential parcel: '{addr_selected}' (Distance: {dist_ft:.2f} feet)")
+    else:
+        print("  No residential property parcel found in buffer. Falling back to first returned feature.")
+        feature = features[0]
+        geom = feature.get("geometry", {})
+        try:
+            if "rings" in geom:
+                shapely_geom = esri_geometry_to_shapely(geom)
+            else:
+                shapely_geom = shape(geom)
+            shapely_geom_6434 = transform(transformer_2234_to_6434.transform, shapely_geom)
+        except Exception as e:
+            print(f"  Error parsing fallback geometry: {e}")
+            return None
+
     props = feature.get("properties") or feature.get("attributes") or {}
-    
-    # Extract attributes (standardizing possible name variations)
     owner = props.get("Owner1") or props.get("OWNER") or props.get("Owner") or "Unknown Owner"
-    addr = props.get("Location") or props.get("SiteAddress") or props.get("LOC_ADR") or "Unknown Address"
+    addr = props.get("Location_1") or props.get("Location") or props.get("SiteAddress") or props.get("LOC_ADR") or "Unknown Address"
     town = props.get("Town_Name") or props.get("TOWN") or "Unknown Town"
     parcel_id = props.get("Mbl") or props.get("PARCEL_ID") or props.get("Map_Block_Lot") or "Unknown ID"
     
-    if "rings" in geom:
-        from shapely.geometry import mapping
-        print("  Esri JSON rings detected. Parsing and converting to standard CCW OGC winding order...")
-        try:
-            shapely_geom = esri_geometry_to_shapely(geom)
-            geom = mapping(shapely_geom)
-        except Exception as e:
-            print(f"  Error parsing Esri JSON geometry: {e}")
-            return None
+    geom = mapping(shapely_geom_6434)
             
     return {
         "geometry": geom,
