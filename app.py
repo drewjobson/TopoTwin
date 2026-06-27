@@ -21,9 +21,9 @@ from pipeline import TopoPlotPipeline, PipelineConfig
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 DEFAULT_LOCATION = {
-    "address": "242 E Main St, Clinton, Connecticut, 06413",
-    "coords": (41.27137, -72.50441),
-    "query": "242 East Main Street, Clinton, CT",
+    "address": "500 Main St, Hartford, Connecticut, 06103",
+    "coords": (41.76218, -72.67401),
+    "query": "500 Main St, Hartford, CT",
 }
 CT_BOUNDS = {"lat_min": 40.98, "lat_max": 42.06, "lon_min": -73.73, "lon_max": -71.78}
 
@@ -368,16 +368,16 @@ with tab_generator:
             st.markdown("**Try these municipal examples:**")
             col_ex1, col_ex2 = st.columns(2)
             with col_ex1:
-                if st.button("Clinton Town Hall"):
+                if st.button("Hartford Public Library"):
                     st.session_state["selected_address"] = DEFAULT_LOCATION["address"]
                     st.session_state["selected_coords"] = DEFAULT_LOCATION["coords"]
                     st.session_state["search_query"] = DEFAULT_LOCATION["query"]
                     st.rerun()
             with col_ex2:
-                if st.button("Hartford City Hall"):
-                    st.session_state["selected_address"] = "550 Main St, Hartford, Connecticut, 06103"
-                    st.session_state["selected_coords"] = (41.76249, -72.67324)
-                    st.session_state["search_query"] = "550 Main Street, Hartford, CT"
+                if st.button("CT State Capitol"):
+                    st.session_state["selected_address"] = "210 Capitol Ave, Hartford, Connecticut, 06106"
+                    st.session_state["selected_coords"] = (41.76428, -72.68232)
+                    st.session_state["search_query"] = "210 Capitol Ave, Hartford, CT"
                     st.rerun()
 
         # Spacing between containers

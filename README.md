@@ -108,13 +108,13 @@ streamlit run app.py
 ```
 
 ### 2. Command Line Interface (CLI)
-Generate a watertight parcel mesh for a Connecticut address (e.g., Clinton Town Hall):
+Generate a watertight parcel mesh for a Connecticut address (e.g., Hartford residential property):
 ```bash
-python topo_agent.py "242 East Main Street, Clinton, CT" --resolution 40 --output-stl clinton_town_hall.stl --output-html clinton_town_hall.html
+python topo_agent.py "50 Elizabeth St, Hartford, CT" --resolution 40 --output-stl hartford_property.stl --output-html hartford_property.html
 ```
 Disable boundary clipping and output a standard rectangular terrain tile:
 ```bash
-python topo_agent.py "242 East Main Street, Clinton, CT" --resolution 40 --no-clip --output-stl clinton_square.stl --output-html clinton_square.html
+python topo_agent.py "50 Elizabeth St, Hartford, CT" --resolution 40 --no-clip --output-stl hartford_square.stl --output-html hartford_square.html
 ```
 
 ### 3. Execution of the Evaluation & Test Harness

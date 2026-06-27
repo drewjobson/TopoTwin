@@ -14,9 +14,9 @@ from tools.stl_writer import write_binary_stl
 
 BENCHMARKS = [
     {
-        "name": "Clinton, CT (Coastal Flat/Hill)",
-        "lat": 41.2781,
-        "lon": -72.5273,
+        "name": "Hartford, CT (Capital Flatland)",
+        "lat": 41.76218,
+        "lon": -72.67401,
         "width_m": 200,
         "height_m": 200
     },
@@ -205,12 +205,12 @@ def run_security_policy_tests() -> bool:
             print("  [PASS] Semantic Gating: Area 51 query blocked")
             
         # Safe coordinates
-        safe_args = {"center_lat": 41.2781, "center_lon": -72.5273}
+        safe_args = {"center_lat": 41.76218, "center_lon": -72.67401}
         if not p_gating.check_action_semantic("get_elevation_grid", safe_args):
-            print("  [FAIL] Semantic Gating: Safe Clinton coordinates blocked")
+            print("  [FAIL] Semantic Gating: Safe Hartford coordinates blocked")
             passed = False
         else:
-            print("  [PASS] Semantic Gating: Safe Clinton coordinates allowed")
+            print("  [PASS] Semantic Gating: Safe Hartford coordinates allowed")
     except Exception as e:
         print(f"  [FAIL] Semantic Gating test failed with exception: {e}")
         passed = False
@@ -278,21 +278,21 @@ def run_self_repair_test() -> bool:
         
     return passed
 
-def run_exact_boundary_clinton_test() -> bool:
+def run_exact_boundary_hartford_test() -> bool:
     print("\n" + "=" * 80)
-    print("RUNNING EXACT BOUNDARY PARCEL TEST: 242 EAST MAIN STREET, CLINTON, CT")
+    print("RUNNING EXACT BOUNDARY PARCEL TEST: 500 MAIN STREET, HARTFORD, CT")
     print("=" * 80)
     
     import topo_agent
     
     passed = False
     try:
-        output_stl = "clinton_town_hall_test.stl"
-        output_html = "clinton_town_hall_test.html"
+        output_stl = "hartford_library_test.stl"
+        output_html = "hartford_library_test.html"
         
-        # Run the full pipeline for Clinton Town Hall with high-res UConn LiDAR
+        # Run the full pipeline for Hartford with high-res UConn LiDAR
         success = topo_agent.run_pipeline(
-            address_or_coords="242 East Main Street, Clinton, CT",
+            address_or_coords="500 Main St, Hartford, CT",
             width_m=200,
             height_m=200,
             resolution=40,
@@ -343,10 +343,10 @@ if __name__ == "__main__":
     # 3. Run green team self-repair tests
     repair_success = run_self_repair_test()
     
-    # 4. Run exact-boundary 9 Marian Lane test
-    clinton_success = run_exact_boundary_clinton_test()
+    # 4. Run exact-boundary Hartford test
+    hartford_success = run_exact_boundary_hartford_test()
     
-    all_success = benchmarks_success and security_success and repair_success and clinton_success
+    all_success = benchmarks_success and security_success and repair_success and hartford_success
     
     print("\n" + "=" * 80)
     print("FINAL EVALUATION SUITE STATUS")
@@ -354,7 +354,7 @@ if __name__ == "__main__":
     print(f"Benchmarks: {'PASSED' if benchmarks_success else 'FAILED'}")
     print(f"Security Policies: {'PASSED' if security_success else 'FAILED'}")
     print(f"Self-Repair Loop: {'PASSED' if repair_success else 'FAILED'}")
-    print(f"Clinton Town Hall Exact-Parcel: {'PASSED' if clinton_success else 'FAILED'}")
+    print(f"Hartford Exact-Parcel: {'PASSED' if hartford_success else 'FAILED'}")
     print("-" * 80)
     print(f"OVERALL STATUS: {'SUCCESS' if all_success else 'FAILURE'}")
     print("=" * 80)

@@ -122,10 +122,10 @@ We verified the final implementation against five separate benchmark properties 
 
 | Address / Benchmark | Resolved Address / Entity | Points Fetched | Vertices | Watertight? | Signed Volume | Status |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Clinton, CT (Flat/Hill)** | Bounding Box Bounding Area | N/A (Grid) | 1,596 | **True** | 48,082.43 mm³ | **PASS** |
+| **Hartford, CT (Flatland)** | Bounding Box Bounding Area | N/A (Grid) | 1,596 | **True** | 48,082.43 mm³ | **PASS** |
 | **Grand Canyon, AZ (Ravines)**| Bounding Box Bounding Area | N/A (Grid) | 1,596 | **True** | 101,718.96 mm³ | **PASS** |
 | **Mount Rainier, WA (Peak)** | Bounding Box Bounding Area | N/A (Grid) | 1,596 | **True** | 271,178.82 mm³ | **PASS** |
-| **242 E Main St, Clinton, CT**| 242 EAST MAIN ST #7 | 822 | 1,644 | **True** | 36,551.41 mm³ | **PASS** |
+| **50 Elizabeth St, Hartford, CT**| 1265 ASYLUM AVE | 822 | 1,644 | **True** | 36,551.41 mm³ | **PASS** |
 | **9 Hilltop Rd, Oxford, CT** | 2 HILLTOP RD | 151 | 302 | **True** | 19,717.92 mm³ | **PASS** |
 | **Rogers Island, Branford, CT**| YON COMIS ISLAND/PHE | 866 | 1,730 | **True** | 29,350.87 mm³ | **PASS** |
 
