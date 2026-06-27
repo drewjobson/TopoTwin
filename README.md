@@ -1,7 +1,5 @@
 # TopoTwin: Advanced Exact-Boundary 3D Terrain Mesh Generator
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/drewjobson/TopoTwin)
-
 **TopoTwin** is an advanced agentic geospatial 3D mesh engine designed for architectural site analysis and physical 3D printing. Unlike traditional terrain models that produce generic rectangular bounding-box tiles, TopoTwin geocodes a target location, queries legal property parcel boundaries, fetches high-resolution LiDAR bare-earth digital elevation models (DEMs), and constructs a mathematically watertight 3D solid manifold shaped precisely like the legal property boundary.
 
 ---
