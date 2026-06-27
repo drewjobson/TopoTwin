@@ -2,7 +2,8 @@
 
 * **Selected Track**: Freestyle Track (Geospatial Agentic 3D Modeling)
 * **Author**: Drew Jobson
-* **Public Code Repository**: [https://github.com/drewjobson/TopoPlot](https://github.com/drewjobson/TopoPlot)
+* **Live Demo URL**: [https://topotwin.onrender.com](https://topotwin.onrender.com)
+* **GitHub Repository**: [https://github.com/drewjobson/TopoTwin](https://github.com/drewjobson/TopoTwin)
 * **Video Demo**: [YouTube Video Link (5 Minutes or less)]
 
 ---
