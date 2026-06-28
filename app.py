@@ -242,10 +242,9 @@ st.markdown('<div class="gradient-subtitle">Statewide Connecticut 2-Foot LiDAR E
 
 
 # Tabs Layout
-tab_generator, tab_guide, tab_whitepapers = st.tabs([
+tab_generator, tab_guide = st.tabs([
     "🏔️ 3D Terrain Generator",
-    "📖 User Guide & About",
-    "📄 Course Whitepapers"
+    "📖 User Guide & About"
 ])
 
 with tab_generator:
@@ -777,34 +776,6 @@ with tab_guide:
             """
         )
 
-with tab_whitepapers:
-    st.header("📄 Course Whitepapers & Blueprints")
-    st.write("These summaries document the core architectures and learnings from the Kaggle course, demonstrating how they are implemented in TopoTwin.")
-    
-    wp_titles = [
-        "1. Spec-Driven Development",
-        "2. Agent Security & Evaluation",
-        "3. Agent Skills",
-        "4. Agent Tools & MCP",
-        "5. The New SDLC with Vibe Coding"
-    ]
-    wp_files = [
-        "specs/whitepapers/spec_driven_development.md",
-        "specs/whitepapers/agent_security_evaluation.md",
-        "specs/whitepapers/agent_skills.md",
-        "specs/whitepapers/agent_tools_interoperability.md",
-        "specs/whitepapers/new_sdlc_vibe_coding.md"
-    ]
-    
-    sub_tabs = st.tabs(wp_titles)
-    for index, file_path in enumerate(wp_files):
-        with sub_tabs[index]:
-            if os.path.exists(file_path):
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                st.markdown(content)
-            else:
-                st.warning(f"Whitepaper file not found at `{file_path}`")
 
 # ── Generation History Sidebar ──────────────────────────────────────────────────
 with st.sidebar:

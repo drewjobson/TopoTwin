@@ -194,7 +194,9 @@ class PipelineResult:
         logs: list = None,
         points_2d: np.ndarray = None,
         elevations_m: np.ndarray = None,
-        model_scale: float = None
+        model_scale: float = None,
+        lat: float = None,
+        lon: float = None
     ):
         self.success = success
         self.vertices = vertices
@@ -206,6 +208,8 @@ class PipelineResult:
         self.points_2d = points_2d
         self.elevations_m = elevations_m
         self.model_scale = model_scale
+        self.lat = lat
+        self.lon = lon
 
 class TopoPlotPipeline:
     def __init__(self, config: PipelineConfig, on_status=None):
@@ -423,7 +427,9 @@ class TopoPlotPipeline:
                 logs=self.logs,
                 points_2d=points_2d,
                 elevations_m=elevations_m,
-                model_scale=model_scale
+                model_scale=model_scale,
+                lat=lat,
+                lon=lon
             )
             
         except Exception as e:
