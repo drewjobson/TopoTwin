@@ -67,7 +67,7 @@
 > 
 > Note how clean the flat solid base is, and how the vertical skirt walls follow the exact municipal boundary lines without any stringing or overhang defects. The bare-earth LiDAR DEM captures the subtle elevation variations of the site, which is invaluable for architects presenting models to clients or planners.
 > 
-> To achieve a clean print like this, the TopoTwin guide recommends slicing with the **Arachne Wall Generator** in OrcaSlicer to fill the sharp property corners. And on high-speed CoreXY printers like the Creality K1, reducing outer wall acceleration to 1000 mm/s² prevents mechanical ringing along these irregular perimeter skirts.
+> To achieve a clean print like this, the TopoTwin guide recommends using the **Arachne Wall Generator** to fill the sharp property corners. And on high-speed 3D printers, reducing outer wall speed and acceleration prevents mechanical ringing along these irregular perimeter skirts.
 > 
 > With TopoTwin, we have transformed non-deterministic spatial data into physical, watertight reality. 
 > 

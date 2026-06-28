@@ -256,9 +256,12 @@ with tab_generator:
         with st.container(border=True):
             st.subheader("1. Address Search")
         
-            address_input = st.text_input(
+            from streamlit_keyup import st_keyup
+            address_input = st_keyup(
                 "Search Connecticut Address (Autocomplete):",
                 value=st.session_state["search_query"],
+                debounce=400,
+                key="address_keyup_input",
                 help="Start typing any Connecticut address. Select the matching address from the dropdown list."
             )
         
@@ -456,9 +459,9 @@ with tab_generator:
                 st.markdown(
                     """
                     <div style="background: rgba(230, 81, 0, 0.05); border: 1px solid rgba(230, 81, 0, 0.15); border-radius: 8px; padding: 16px; text-align: left; margin-top: 24px; color: #1F2937;">
-                    <strong>⚙️ OrcaSlicer & Creality K1 Recommendations:</strong><br>
-                    - Use the <strong>Arachne</strong> wall generator in OrcaSlicer to fill fine property edges cleanly.<br>
-                    - Tuned Outer Wall Acceleration: <strong>1000 - 1500 mm/s²</strong> and Outer Wall Speed: <strong>40 - 60 mm/s</strong> to eliminate vertical skirt ringing.
+                    <strong>⚙️ 3D Slicer Kinematics Recommendations:</strong><br>
+                    - Use the <strong>Arachne</strong> wall generator in your slicer to fill fine property edges cleanly.<br>
+                    - Tuned Outer Wall Acceleration: <strong>1000 - 1500 mm/s²</strong> and Outer Wall Speed: <strong>40 - 60 mm/s</strong> on high-speed printers to eliminate vertical skirt ringing.
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -468,12 +471,27 @@ with tab_generator:
             if generate_btn:
                 # Run Pipeline with st.status loading widget
                 with st.status("Generating 3D Model...", expanded=True) as status_widget:
-                    st.write("🔄 Locked in coordinates via handoff...")
-                
-                    lat, lon = st.session_state["selected_coords"]
-                    resolved_name = st.session_state["selected_address"]
+                    # Check if the user typed a new address but did not click a suggestion
+                    typed_differs = (
+                        clean_address(address_input).lower() != clean_address(st.session_state["selected_address"]).lower()
+                    )
+                    has_custom_geom = st.session_state.get("custom_geometry") is not None
+                    
+                    if typed_differs and not has_custom_geom:
+                        st.write("🔄 Resolving coordinates for new search query...")
+                        lat = None
+                        lon = None
+                        resolved_name = address_input
+                    else:
+                        st.write("🔄 Locked in coordinates via handoff...")
+                        lat, lon = st.session_state["selected_coords"]
+                        resolved_name = st.session_state["selected_address"]
+                    
                     cleaned = clean_address(resolved_name)
-                    st.write(f"📍 **Target:** {resolved_name} ({lat:.6f}, {lon:.6f})")
+                    if lat is not None and lon is not None:
+                        st.write(f"📍 **Target:** {resolved_name} ({lat:.6f}, {lon:.6f})")
+                    else:
+                        st.write(f"📍 **Target Address:** {resolved_name}")
 
                     # Create TopoPlotPipeline
                     config = PipelineConfig(
@@ -520,6 +538,15 @@ with tab_generator:
                         st.write(
                             f"✓ **Parcel Found:** {parcel_info['town']} — Owner: {parcel_info['owner']} (ID: {parcel_info['parcel_id']})"
                         )
+
+                    # Update session state if geocoding was resolved inside the pipeline dynamically
+                    if result.lat is not None and result.lon is not None:
+                        st.session_state["selected_coords"] = (result.lat, result.lon)
+                        resolved_addr_new = parcel_info.get("address", result.parcel_info.get("address", resolved_name))
+                        st.session_state["selected_address"] = resolved_addr_new
+                        st.session_state["search_query"] = resolved_addr_new
+                        resolved_name = resolved_addr_new
+                        cleaned = clean_address(resolved_name)
 
                     status_widget.update(label="✅ Generation Complete!", state="complete", expanded=False)
             
@@ -745,8 +772,8 @@ with tab_guide:
         st.markdown(
             """
             Exact-boundary terrain models feature highly irregular edges. To print them cleanly:
-            - **Arachne Wall Generator**: Use the Arachne engine in OrcaSlicer to dynamically vary extrusion widths and fill fine property corners.
-            - **SKIRT ringing prevention**: Reduce outer wall speed to 40-60 mm/s and outer wall acceleration to 1000-1500 mm/s² on fast coreXY printers like the Creality K1 to eliminate resonance along the base skirt.
+            - **Arachne Wall Generator**: Select the Arachne engine instead of Classic in your slicer to dynamically vary extrusion widths and fill fine property corners.
+            - **Skirt Ringing Prevention**: Reduce outer wall speed to 40-60 mm/s and outer wall acceleration to 1000-1500 mm/s² on high-speed printers to eliminate mechanical ringing along the vertical base skirt.
             """
         )
 

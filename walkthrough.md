@@ -71,20 +71,20 @@ All core workflow steps (coordinate geocoding, parcel queries, elevation downloa
 
 ---
 
-## 3D Slicer Kinematics Recommendations (OrcaSlicer & Creality K1)
+## 3D Slicer Kinematics Recommendations
 
 Exact-boundary parcel meshes feature organic, irregular perimeters. Printing these boundaries introduces specific mechanical variables.
 
 > [!TIP]
 > **Arachne Wall Generator**
-> - In **OrcaSlicer**, select the **Arachne** wall generator instead of Classic. Arachne dynamically varies extrusion width to fill thin, sharp property corners, eliminating voids and preserving fine boundary details.
+> - Select the **Arachne** wall generator instead of Classic in your slicer. Arachne dynamically varies extrusion width to fill thin, sharp property corners, eliminating voids and preserving fine boundary details.
 
 > [!IMPORTANT]
-> **Outer Wall Acceleration Tuning for Creality K1**
-> - Irregular boundaries involve rapid toolpath direction changes. To prevent mechanical ringing/ghosting along the vertical skirt walls of the mesh on the **Creality K1**:
->   1. Set **Outer wall acceleration** to **1000 - 1500 mm/s²** (down from the default 5000 mm/s²).
+> **Outer Wall Acceleration Tuning for High-Speed Printers**
+> - Irregular boundaries involve rapid toolpath direction changes. To prevent mechanical ringing/ghosting along the vertical skirt walls of the mesh on high-speed printers:
+>   1. Set **Outer wall acceleration** to **1000 - 1500 mm/s²** (down from high speed defaults).
 >   2. Reduce **Outer wall speed** to **40 - 60 mm/s**.
->   3. Ensure **Input Shaper** is calibrated on both X and Y axes to dampen resonances.
+>   3. Ensure resonance compensation/input shaping is calibrated on both X and Y axes to dampen resonances.
 
 ---
 
