@@ -27,3 +27,9 @@ hartford_9_hilltop_test.html
 test_repair.stl
 test_repair.html
 test_visual.html
+
+# Media, video, and audio assets
+*.mp3
+*.mp4
+*.m4a
+*.png
