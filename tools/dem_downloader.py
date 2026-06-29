@@ -75,18 +75,17 @@ class DEMDownloader:
                         raise ConnectionError(f"ImageServer API Error: Status {response.status}")
                         
                     data = await response.json()
-                    elevations = []
+                    elevations = [-9999.0] * len(points_chunk)
                     
                     if "samples" in data:
-                        for sample in data["samples"]:
-                            val = sample.get("value", "-9999")
-                            try:
-                                elevations.append(float(val))
-                            except ValueError:
-                                elevations.append(-9999.0)
-                    else:
-                        elevations = [-9999.0] * len(points_chunk)
-                        
+                        for idx, sample in enumerate(data["samples"]):
+                            loc_id = sample.get("locationId", idx)
+                            if loc_id is not None and 0 <= loc_id < len(points_chunk):
+                                val = sample.get("value", "-9999")
+                                try:
+                                    elevations[loc_id] = float(val)
+                                except ValueError:
+                                    elevations[loc_id] = -9999.0
                     return elevations
             except (aiohttp.ClientError, asyncio.TimeoutError, ConnectionError, ValueError) as e:
                 if attempt == retries - 1:
